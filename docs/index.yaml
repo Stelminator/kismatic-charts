@@ -1,7 +1,26 @@
 apiVersion: v1
 entries:
   grafana:
-  - created: 2017-06-21T18:18:01.161975836Z
+  - created: 2017-08-07T21:06:07.859668382Z
+    description: The leading tool for querying and visualizing time series and metrics.
+    digest: 8e521d595c47ff84a4a04936b10b7798dbd860c404be5711d8f95c76e6432e9f
+    engine: gotpl
+    home: https://grafana.net
+    icon: https://raw.githubusercontent.com/grafana/grafana/master/public/img/logo_transparent_400x.png
+    maintainers:
+    - email: dkoshkin@apprenda.com
+      name: Dimitri Koshkin
+    - email: abrand@apprenda.com
+      name: Alexander Brand
+    - email: zanhsieh@gmail.com
+      name: Ming Hsieh
+    name: grafana
+    sources:
+    - https://github.com/grafana/grafana
+    urls:
+    - https://apprenda.github.io/kismatic-charts/grafana-0.4.2.tgz
+    version: 0.4.2
+  - created: 2017-08-07T21:06:07.856443428Z
     description: The leading tool for querying and visualizing time series and metrics.
     digest: 75deb911e6563007588bfd75e1e1af64c8a6984d50ce8898f24b7c4e2d04ec4c
     engine: gotpl
@@ -20,7 +39,7 @@ entries:
     urls:
     - https://apprenda.github.io/kismatic-charts/grafana-0.3.6.tgz
     version: 0.3.6
-  - created: 2017-06-21T18:18:01.158599659Z
+  - created: 2017-08-07T21:06:07.853292785Z
     description: The leading tool for querying and visualizing time series and metrics.
     digest: a54c6840abe3f2ba78bd3de0686dcbbda5a387ed3f3936125917ed73a25878ce
     engine: gotpl
@@ -37,10 +56,10 @@ entries:
     version: 0.3.5
   prometheus-grafana:
   - apiVersion: v1
-    created: 2017-06-21T18:18:01.165865003Z
+    created: 2017-08-07T21:06:07.864474151Z
     description: A monitoring stack comprising of prometheus and grafana, with a configured
       datasource and some starter dashboards
-    digest: f8927bfcad14776a381f76f98c4571c1b6975e41ae7c72c47b287b67014de40a
+    digest: a92eb1a2062602a1f1462c32020fdb2967150b99aa3f11f0e4346ffea0fd7ea9
     maintainers:
     - email: dkoshkin@apprenda.com
       name: Dimitri Koshkin
@@ -50,4 +69,4 @@ entries:
     urls:
     - https://apprenda.github.io/kismatic-charts/prometheus-grafana-1.0.0.tgz
     version: 1.0.0
-generated: 2017-06-21T18:18:01.156014838Z
+generated: 2017-08-07T21:06:07.850013195Z

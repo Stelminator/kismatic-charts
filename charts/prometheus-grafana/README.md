@@ -6,7 +6,7 @@
 
 ## To install
 ```
-helm install kismatic/prometheus-grafana --name monitoring --namespace monitoring --set server.adminPassword=$GRAFANA_ADMIN_PASSWORD
+helm install kismatic/prometheus-grafana --name monitoring --namespace monitoring --set grafana.server.adminPassword=$GRAFANA_ADMIN_PASSWORD
 ```
 
 This will deploy all the kuberntes resources for this chart and print out the details. 
@@ -35,7 +35,7 @@ helm delete monitoring --purge
 #### Configuration
 | Parameter                                      | Description                               | Default                                           |
 |------------------------------------------------|-------------------------------------------|---------------------------------------------------|
-| `grafana.server.image`                         | Container image to run                    | grafana/grafana:4.3.2                             |
+| `grafana.server.image`                         | Container image to run                    | grafana/grafana:4.4.3                             |
 | `grafana.server.adminUser`                     | Admin user username                       | admin                                             |
 | `grafana.server.adminPassword`                 | Admin user password                       | admin                                             |
 | `grafana.server.persistentVolume.enabled`      | Create a volume to store data             | false                                             |
@@ -53,6 +53,7 @@ helm delete monitoring --purge
 #### Components
 * [Prometheus](https://github.com/prometheus/prometheus) - is a systems and service monitoring system
 * [alertmanager](https://github.com/prometheus/alertmanager) - handles alerts sent by Prometheus server
+* [pushgateway](https://github.com/prometheus/pushgateway) - exists to allow ephemeral and batch jobs to expose their metrics to Prometheus
 * [node-exporter](https://github.com/prometheus/node_exporter) - a Prometheus exporter for hardware and OS metrics exposed by *NIX kernels
 * [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics) -  a simple service that listens to the Kubernetes API server and generates metrics about the state of the objects runnning on the Kuberntes cluster, such as deployments, nodes and pods.
 #### Configuration
@@ -126,9 +127,30 @@ helm delete monitoring --purge
 | `prometheus.nodeExporter.service.loadBalancerSourceRanges` | list of IP CIDRs allowed access to load balancer (if supported) | `[]` |
 | `prometheus.nodeExporter.service.servicePort` | node-exporter service port | `9100` |
 | `prometheus.nodeExporter.service.type` | type of node-exporter service to create | `ClusterIP` |
+| `prometheus.pushgateway.enabled` | If true, create pushgateway | `true`
+| `prometheus.pushgateway.name` | pushgateway container name | `pushgateway`
+| `prometheus.pushgateway.image.repository` | pushgateway container image repository | `prom/pushgateway`
+| `prometheus.pushgateway.image.tag` | pushgateway container image tag | `v0.4.0`
+| `prometheus.pushgateway.image.pullPolicy` | pushgateway container image pull policy | `IfNotPresent`
+| `prometheus.pushgateway.extraArgs` | Additional pushgateway container arguments | `{}`
+| `prometheus.pushgateway.ingress.enabled` | If true, pushgateway Ingress will be created | `false`
+| `prometheus.pushgateway.ingress.annotations` | pushgateway Ingress annotations | `{}`
+| `prometheus.pushgateway.ingress.hosts` | pushgateway Ingress hostnames | `[]`
+| `prometheus.pushgateway.ingress.tls` | pushgateway Ingress TLS configuration (YAML) | `[]`
+| `prometheus.pushgateway.nodeSelector` | node labels for pushgateway pod assignment | `{}`
+| `prometheus.pushgateway.podAnnotations` | annotations to be added to pushgateway pods | `{}`
+| `prometheus.pushgateway.replicaCount` | desired number of pushgateway pods | `1`
+| `prometheus.pushgateway.resources` | pushgateway pod resource requests & limits | `{}`
+| `prometheus.pushgateway.service.annotations` | annotations for pushgateway service | `{}`
+| `prometheus.pushgateway.service.clusterIP` | internal pushgateway cluster service IP | `""`
+| `prometheus.pushgateway.service.externalIPs` | pushgateway service external IP addresses | `[]`
+| `prometheus.pushgateway.service.loadBalancerIP` | IP address to assign to load balancer (if supported) | `""`
+| `prometheus.pushgateway.service.loadBalancerSourceRanges` | list of IP CIDRs allowed access to load balancer (if supported) | `[]`
+| `prometheus.pushgateway.service.servicePort` | pushgateway service port | `9091`
+| `prometheus.pushgateway.service.type` | type of pushgateway service to create | `ClusterIP`
 | `prometheus.server.name` | Prometheus server container name | `server` |
 | `prometheus.server.image.repository` | Prometheus server container image repository | `prom/prometheus` |
-| `prometheus.server.image.tag` | Prometheus server container image tag | `v1.5.1` |
+| `prometheus.server.image.tag` | Prometheus server container image tag | `v1.5.2` |
 | `prometheus.server.image.pullPolicy` | Prometheus server container image pull policy | `IfNotPresent` |
 | `prometheus.server.alertmanagerURL` | (optional) alertmanager URL; only used if alertmanager.enabled = false | `""` |
 | `prometheus.server.extraArgs` | Additional Prometheus server container arguments | `{}` |

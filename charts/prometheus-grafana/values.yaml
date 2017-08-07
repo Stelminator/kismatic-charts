@@ -23,6 +23,11 @@ prometheus:
     ##
     extraArgs: {}
 
+    ## Additional alertmanager container environment variable
+    ## For instance to add a http_proxy
+    ##
+    extraEnv: {}
+
     ingress:
       ## If true, alertmanager Ingress will be created
       ##
@@ -84,10 +89,13 @@ prometheus:
       size: 2Gi
 
       ## alertmanager data Persistent Volume Storage Class
-      ## If defined, volume.beta.kubernetes.io/storage-class: <storageClass>
-      ## Default: volume.alpha.kubernetes.io/storage-class: default
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+      ##   GKE, AWS & OpenStack)
       ##
-      storageClass: ""
+      # storageClass: "-"
 
       ## Subdirectory of alertmanager data Persistent Volume to mount
       ## Useful if the volume's root directory is not empty
@@ -221,6 +229,19 @@ prometheus:
     ##
     extraArgs: {}
 
+    ## Additional node-exporter hostPath mounts
+    ##
+    extraHostPathMounts: []
+      # - name: textfile-dir
+      #   mountPath: /srv/txt_collector
+      #   hostPath: /var/lib/node-exporter
+      #   readOnly: true
+
+    ## Node tolerations for node-exporter scheduling to nodes with taints
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+    ##
+    tolerations: []
+
     ## Node labels for node-exporter pod assignment
     ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
     ##
@@ -278,6 +299,14 @@ prometheus:
     ## Additional Prometheus server container arguments
     ##
     extraArgs: {}
+
+    ## Additional Prometheus server hostPath mounts
+    ##
+    extraHostPathMounts: []
+      # - name: certs-dir
+      #   mountPath: /etc/kubernetes/certs
+      #   hostPath: /etc/kubernetes/certs
+      #   readOnly: true
 
     ingress:
       ## If true, Prometheus server Ingress will be created
@@ -339,10 +368,13 @@ prometheus:
       size: 8Gi
 
       ## Prometheus server data Persistent Volume Storage Class
-      ## If defined, volume.beta.kubernetes.io/storage-class: <storageClass>
-      ## Default: volume.alpha.kubernetes.io/storage-class: default
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+      ##   GKE, AWS & OpenStack)
       ##
-      storageClass: ""
+      # storageClass: "-"
 
       ## Subdirectory of Prometheus server data Persistent Volume to mount
       ## Useful if the volume's root directory is not empty
@@ -385,6 +417,89 @@ prometheus:
     ## Prometheus server pod termination grace period
     ##
     terminationGracePeriodSeconds: 300
+
+  pushgateway:
+    ## If false, pushgateway will not be installed
+    ##
+    enabled: true
+
+    ## pushgateway container name
+    ##
+    name: pushgateway
+
+    ## pushgateway container image
+    ##
+    image:
+      repository: prom/pushgateway
+      tag: v0.4.0
+      pullPolicy: IfNotPresent
+
+    ## Additional pushgateway container arguments
+    ##
+    extraArgs: {}
+
+    ingress:
+      ## If true, pushgateway Ingress will be created
+      ##
+      enabled: false
+
+      ## pushgateway Ingress annotations
+      ##
+      annotations:
+      #   kubernetes.io/ingress.class: nginx
+      #   kubernetes.io/tls-acme: 'true'
+
+      ## pushgateway Ingress hostnames
+      ## Must be provided if Ingress is enabled
+      ##
+      hosts: []
+      #   - pushgateway.domain.com
+
+      ## pushgateway Ingress TLS configuration
+      ## Secrets must be manually created in the namespace
+      ##
+      tls: []
+      #   - secretName: prometheus-alerts-tls
+      #     hosts:
+      #       - pushgateway.domain.com
+
+    ## Node labels for pushgateway pod assignment
+    ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+    ##
+    nodeSelector: {}
+
+    ## Annotations to be added to pushgateway pods
+    ##
+    podAnnotations: {}
+
+    replicaCount: 1
+
+    ## pushgateway resource requests and limits
+    ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    ##
+    resources: {}
+      # limits:
+      #   cpu: 10m
+      #   memory: 32Mi
+      # requests:
+      #   cpu: 10m
+      #   memory: 32Mi
+
+    service:
+      annotations:
+        prometheus.io/probe: pushgateway
+      labels: {}
+      clusterIP: ""
+
+      ## List of IP addresses at which the pushgateway service is available
+      ## Ref: https://kubernetes.io/docs/user-guide/services/#external-ips
+      ##
+      externalIPs: []
+
+      loadBalancerIP: ""
+      loadBalancerSourceRanges: []
+      servicePort: 9091
+      type: ClusterIP
 
   ## alertmanager ConfigMap entries
   ##
@@ -499,7 +614,57 @@ prometheus:
           relabel_configs:
             - action: labelmap
               regex: __meta_kubernetes_node_label_(.+)
+            - target_label: __address__
+              replacement: kubernetes.default.svc:443
+            - source_labels: [__meta_kubernetes_node_name]
+              regex: (.+)
+              target_label: __metrics_path__
+              replacement: /api/v1/nodes/${1}/proxy/metrics
 
+        # Scrape config for Kubelet cAdvisor.
+        #
+        # This is required for Kubernetes 1.7.3 and later, where cAdvisor metrics
+        # (those whose names begin with 'container_') have been removed from the
+        # Kubelet metrics endpoint.  This job scrapes the cAdvisor endpoint to
+        # retrieve those metrics.
+        #
+        # In Kubernetes 1.7.0-1.7.2, these metrics are only exposed on the cAdvisor
+        # HTTP endpoint; use "replacement: /api/v1/nodes/${1}:4194/proxy/metrics"
+        # in that case (and ensure cAdvisor's HTTP server hasn't been disabled with
+        # the --cadvisor-port=0 Kubelet flag).
+        #
+        # This job is not necessary and should be removed in Kubernetes 1.6 and
+        # earlier versions, or it will cause the metrics to be scraped twice.
+        
+        - job_name: 'kubernetes-cadvisor'
+
+          # Default to scraping over https. If required, just disable this or change to
+          # `http`.
+          scheme: https
+
+          # This TLS & bearer token file config is used to connect to the actual scrape
+          # endpoints for cluster components. This is separate to discovery auth
+          # configuration because discovery & scraping are two separate concerns in
+          # Prometheus. The discovery auth config is automatic if Prometheus runs inside
+          # the cluster. Otherwise, more config options have to be provided within the
+          # <kubernetes_sd_config>.
+          tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+          kubernetes_sd_configs:
+          - role: node
+
+          relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+                    
         # Scrape config for service endpoints.
         #
         # The relabeling allows the actual service scrape endpoint to be configured
@@ -511,6 +676,7 @@ prometheus:
         # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
         # * `prometheus.io/port`: If the metrics are exposed on a different port to the
         # service then set this appropriately.
+
         - job_name: 'kubernetes-service-endpoints'
 
           kubernetes_sd_configs:
@@ -541,6 +707,17 @@ prometheus:
             - source_labels: [__meta_kubernetes_service_name]
               action: replace
               target_label: kubernetes_name
+
+        - job_name: 'prometheus-pushgateway'
+          honor_labels: true
+
+          kubernetes_sd_configs:
+            - role: service
+
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe]
+              action: keep
+              regex: pushgateway
 
         # Example scrape config for probing services via the Blackbox Exporter.
         #
@@ -609,6 +786,10 @@ prometheus:
               action: replace
               target_label: kubernetes_pod_name
 
+  networkPolicy:
+    ## Enable creation of NetworkPolicy resources.
+    ##
+    enabled: false
 # Grafana
 # -------------------------------------------------------------------#
 grafana:
@@ -618,13 +799,9 @@ grafana:
     # annotations:
     #   iam.amazonaws.com/role: grafana
 
-    ## Grafana service port
-    ##
-    httpPort: 80
-
     ## Grafana Docker image
     ##
-    image: "grafana/grafana:4.3.2"
+    image: "grafana/grafana:4.4.3"
 
     nodeSelector: {}
 
@@ -658,7 +835,7 @@ grafana:
     name: grafana
 
     adminUser: "admin"
-    adminPassword: "admin"
+    # adminPassword: "admin"
 
     ## Global imagePullPolicy
     ## Default: 'Always' if image tag is 'latest', else 'IfNotPresent'
@@ -700,11 +877,6 @@ grafana:
       ##
       # storageClass:
 
-      ## Data Persistent Volume existing claim name
-      ## Requires server.persistentVolume.enabled: true
-      ## If defined, PVC must be created manually before volume will be bound
-      existingClaim: ""
-
       ## Subdirectory of data Persistent Volume to mount
       ## Useful if the volume's root directory is not empty
       ##
@@ -721,31 +893,41 @@ grafana:
         cpu: 100m
         memory: 100Mi
 
-    ## Grafana service type
-    ##
-    serviceType: NodePort
+    ## Grafana service
+    service:
+      ## Grafana service annotations
+      ##
+      annotations: {}
 
-    ## Load balancer IP address
-    ## Is not required, but allows for static address with
-    ## serviceType LoadBalancer.
-    ## If not supported by cloud provider, this field is ignored.
-    ## Default: nil
-    ##
-    # loadBalancerIP: 130.211.x.x
+      ## Grafana service type
+      ##
+      type: NodePort
 
-    ## This will restrict traffic through the cloud-provider load-balancer
-    ## to the specified client IPs.
-    ## If not supported by cloud provider, this field is ignored.
-    ## Default: nil
-    ##
-    # loadBalancerSourceRanges:
-    #   - 0.0.0.0/0
+      ## Grafana service port
+      ##
+      httpPort: 80
 
-    ## nodePort port number
-    ## Is not required, but allows for static port assignment with
-    ## serviceType NodePort.
-    ## Default: nil
-    # nodePort: 30000
+      ## Load balancer IP address
+      ## Is not required, but allows for static address with
+      ## serviceType LoadBalancer.
+      ## If not supported by cloud provider, this field is ignored.
+      ## Default: nil
+      ##
+      # loadBalancerIP: 130.211.x.x
+
+      ## This will restrict traffic through the cloud-provider load-balancer
+      ## to the specified client IPs.
+      ## If not supported by cloud provider, this field is ignored.
+      ## Default: nil
+      ##
+      # loadBalancerSourceRanges:
+      #   - 0.0.0.0/0
+
+      ## nodePort port number
+      ## Is not required, but allows for static port assignment with
+      ## serviceType NodePort.
+      ## Default: nil
+      # nodePort: 30000
 
     ## Grafana local config path
     ## Default '/etc/grafana'
@@ -837,7 +1019,7 @@ grafana:
   watcher:
     ## Grafana-Watcher Docker image
     ##
-    image: "quay.io/coreos/grafana-watcher:v0.0.4"
+    image: "quay.io/coreos/grafana-watcher:v0.0.6"
 
     ## Grafana-Watcher container name
     ##
