@@ -1,7 +1,7 @@
 apiVersion: v1
 description: A monitoring stack comprising of prometheus and grafana, with a configured datasource and some starter dashboards
 name: prometheus-grafana
-version: 1.0.0
+version: 0.1.0
 maintainers:
   - name: Dimitri Koshkin
     email: dkoshkin@apprenda.com

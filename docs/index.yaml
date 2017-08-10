@@ -1,7 +1,7 @@
 apiVersion: v1
 entries:
   grafana:
-  - created: 2017-08-07T21:06:07.859668382Z
+  - created: 2017-08-10T16:10:06.124065758Z
     description: The leading tool for querying and visualizing time series and metrics.
     digest: 8e521d595c47ff84a4a04936b10b7798dbd860c404be5711d8f95c76e6432e9f
     engine: gotpl
@@ -20,46 +20,12 @@ entries:
     urls:
     - https://apprenda.github.io/kismatic-charts/grafana-0.4.2.tgz
     version: 0.4.2
-  - created: 2017-08-07T21:06:07.856443428Z
-    description: The leading tool for querying and visualizing time series and metrics.
-    digest: 75deb911e6563007588bfd75e1e1af64c8a6984d50ce8898f24b7c4e2d04ec4c
-    engine: gotpl
-    home: https://grafana.net
-    icon: https://raw.githubusercontent.com/grafana/grafana/master/public/img/logo_transparent_400x.png
-    maintainers:
-    - email: dkoshkin@apprenda.com
-      name: Dimitri Koshkin
-    - email: abrand@apprenda.com
-      name: Alexander Brand
-    - email: zanhsieh@gmail.com
-      name: Ming Hsieh
-    name: grafana
-    sources:
-    - https://github.com/grafana/grafana
-    urls:
-    - https://apprenda.github.io/kismatic-charts/grafana-0.3.6.tgz
-    version: 0.3.6
-  - created: 2017-08-07T21:06:07.853292785Z
-    description: The leading tool for querying and visualizing time series and metrics.
-    digest: a54c6840abe3f2ba78bd3de0686dcbbda5a387ed3f3936125917ed73a25878ce
-    engine: gotpl
-    home: https://grafana.net
-    icon: https://raw.githubusercontent.com/grafana/grafana/master/public/img/logo_transparent_400x.png
-    maintainers:
-    - email: zanhsieh@gmail.com
-      name: Ming Hsieh
-    name: grafana
-    sources:
-    - https://github.com/grafana/grafana
-    urls:
-    - https://apprenda.github.io/kismatic-charts/grafana-0.3.5.tgz
-    version: 0.3.5
   prometheus-grafana:
   - apiVersion: v1
-    created: 2017-08-07T21:06:07.864474151Z
+    created: 2017-08-10T16:10:06.128626129Z
     description: A monitoring stack comprising of prometheus and grafana, with a configured
       datasource and some starter dashboards
-    digest: a92eb1a2062602a1f1462c32020fdb2967150b99aa3f11f0e4346ffea0fd7ea9
+    digest: b26afdc2b65a4c4b87e69acd4fb71ffaf53868365a5a7252779bc8d72e31402b
     maintainers:
     - email: dkoshkin@apprenda.com
       name: Dimitri Koshkin
@@ -67,6 +33,6 @@ entries:
       name: Alexander Brand
     name: prometheus-grafana
     urls:
-    - https://apprenda.github.io/kismatic-charts/prometheus-grafana-1.0.0.tgz
-    version: 1.0.0
-generated: 2017-08-07T21:06:07.850013195Z
+    - https://apprenda.github.io/kismatic-charts/prometheus-grafana-0.1.0.tgz
+    version: 0.1.0
+generated: 2017-08-10T16:10:06.121341101Z
