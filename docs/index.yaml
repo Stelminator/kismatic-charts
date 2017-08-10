@@ -1,37 +1,38 @@
 apiVersion: v1
 entries:
   grafana:
-  - created: 2017-05-31T11:07:05.479860834-04:00
+  - created: 2017-08-10T16:10:06.124065758Z
     description: The leading tool for querying and visualizing time series and metrics.
-    digest: a54c6840abe3f2ba78bd3de0686dcbbda5a387ed3f3936125917ed73a25878ce
+    digest: 8e521d595c47ff84a4a04936b10b7798dbd860c404be5711d8f95c76e6432e9f
     engine: gotpl
     home: https://grafana.net
     icon: https://raw.githubusercontent.com/grafana/grafana/master/public/img/logo_transparent_400x.png
     maintainers:
+    - email: dkoshkin@apprenda.com
+      name: Dimitri Koshkin
+    - email: abrand@apprenda.com
+      name: Alexander Brand
     - email: zanhsieh@gmail.com
       name: Ming Hsieh
     name: grafana
     sources:
     - https://github.com/grafana/grafana
     urls:
-    - https://apprenda.github.io/kismatic-charts/grafana-0.3.5.tgz
-    version: 0.3.5
-  prometheus:
-  - created: 2017-05-31T11:07:05.480426791-04:00
-    description: Prometheus is a monitoring system and time series database.
-    digest: 4e72afed0f28bd5f8648d3caf093e9920c805b1fddc2134188ed7443fe55716c
-    engine: gotpl
-    home: https://prometheus.io/
-    icon: https://raw.githubusercontent.com/prometheus/prometheus.github.io/master/assets/prometheus_logo-cb55bb5c346.png
+    - https://apprenda.github.io/kismatic-charts/grafana-0.4.2.tgz
+    version: 0.4.2
+  prometheus-grafana:
+  - apiVersion: v1
+    created: 2017-08-10T16:10:06.128626129Z
+    description: A monitoring stack comprising of prometheus and grafana, with a configured
+      datasource and some starter dashboards
+    digest: b26afdc2b65a4c4b87e69acd4fb71ffaf53868365a5a7252779bc8d72e31402b
     maintainers:
-    - email: mgoodness@gmail.com
-      name: Michael Goodness
-    name: prometheus
-    sources:
-    - https://github.com/prometheus/alertmanager
-    - https://github.com/prometheus/prometheus
-    - https://github.com/kubernetes/kube-state-metrics
+    - email: dkoshkin@apprenda.com
+      name: Dimitri Koshkin
+    - email: abrand@apprenda.com
+      name: Alexander Brand
+    name: prometheus-grafana
     urls:
-    - https://apprenda.github.io/kismatic-charts/prometheus-3.0.2.tgz
-    version: 3.0.2
-generated: 2017-05-31T11:07:05.478815263-04:00
+    - https://apprenda.github.io/kismatic-charts/prometheus-grafana-0.1.0.tgz
+    version: 0.1.0
+generated: 2017-08-10T16:10:06.121341101Z
